@@ -83,7 +83,47 @@ class Text(QtGui.QTextEdit):
 class Canvas(QtGui.QWidget):
     def __init__(self, parent=None, text=u''):
         QtGui.QWidget.__init__(self, parent)
+
+class PopupMenu(QtGui.QDialog):
+    def __init__(self, parent=None,):
+        QtGui.QDialog.__init__(self, parent)
+        self.selection = None
+        self.__init_app_win()
         
+    def __init_app_win(self):
+        self.__ok_but = QtGui.QPushButton(u'Ok',self)
+        self.__cancel_but = QtGui.QPushButton(u'Cancel',self)        
+        self.__list = QtGui.QListWidget(self)
+        self.__grid = QtGui.QGridLayout(self)
+        self.__grid.addWidget(self.__list,0,0,2,4)
+        self.__grid.addWidget(self.__ok_but,4,0)
+        self.__grid.addWidget(self.__cancel_but,4,1)        
+        self.setLayout(self.__grid)
+        self.setModal(True)
+        self.connect(self,
+                     QtCore.SIGNAL('itemDoubleClicked(QListWidgetItem*)'),
+                     self.__ok_but_clicked)
+        self.connect(self.__ok_but,
+                     QtCore.SIGNAL('clicked()'),
+                     self.__ok_but_clicked)
+        self.connect(self.__cancel_but,
+                     QtCore.SIGNAL('clicked()'),
+                     self.__cancel_but_clicked)   
+
+    def __ok_but_clicked(self):
+        self.selection = self.__list.currentRow()
+        self.hide()
+
+    def __cancel_but_clicked(self):
+        self.selection = None
+
+    def show(self,menu_options,title):
+        self.setWindowTitle(title)
+        self.__list.clear()
+        self.__list.addItems(menu_options)
+        QtGui.QDialog.show(self)
+        
+    
 class PyS60App(QtGui.QWidget):
     def __init__(self, parent=None, title=u'', size=(240,320)):
         self.__app = QtGui.QApplication(sys.argv)
@@ -167,6 +207,9 @@ app = PyS60App()
 
 if __name__ == "__main__":
 
+    #a=PopupMenu()
+    #a.show([u"a",u"b"],u'Tsts')
+
     def new_text_body():
         global app
         app.body = Text()
@@ -188,17 +231,17 @@ if __name__ == "__main__":
                           (u"Item d",Icon(None,None,None)),
                           (u"Item e",Icon(None,None,None))])
         elif tp == 2:
-            lb = Listbox([(u"Item 1",u"Item a"),
-                          (u"Item 2",u"Item b"),
-                          (u"Item 3",u"Item c"),
-                          (u"Item 4",u"Item d"),
-                          (u"Item 5",u"Item e")])
+            lb = Listbox([(u"Item 1",u"Second line"),
+                          (u"Item 2",u"Second line"),
+                          (u"Item 3",u"Second line"),
+                          (u"Item 4",u"Second line"),
+                          (u"Item 5",u"Second line")])
         elif tp == 3:
-            lb = Listbox([(u"Item a",u"Item 1",Icon(None,None,None)),
-                          (u"Item b",u"Item 2",Icon(None,None,None)),
-                          (u"Item c",u"Item 3",Icon(None,None,None)),
-                          (u"Item d",u"Item 4",Icon(None,None,None)),
-                          (u"Item e",u"Item 5",Icon(None,None,None))])
+            lb = Listbox([(u"Item a",u"Second line",Icon(None,None,None)),
+                          (u"Item b",u"Second line",Icon(None,None,None)),
+                          (u"Item c",u"Second line",Icon(None,None,None)),
+                          (u"Item d",u"Second line",Icon(None,None,None)),
+                          (u"Item e",u"Second line",Icon(None,None,None))])
         app.body = lb
         
     app.title = u"Bodies"
