@@ -204,11 +204,18 @@ class PyS60App(QtGui.QWidget):
         self.__menu_but.setMenu(menu)
 
 app = PyS60App()
+__pmenu = PopupMenu()
+
+def popup_menu(options,title):
+    __pmenu.show(options,title)
+    return __pmenu.selection
 
 if __name__ == "__main__":
 
-    #a=PopupMenu()
-    #a.show([u"a",u"b"],u'Tsts')
+    def popup_menu_test(): 
+        op = [u'First option', u'Second option', u'Third option']
+        title = u'Your option:'
+        print popup_menu(op,title)
 
     def new_text_body():
         global app
@@ -250,6 +257,7 @@ if __name__ == "__main__":
                              (u'single w/ icons',lambda:new_listbox_body(1)),
                              (u'double',lambda:new_listbox_body(2)),
                              (u'double w/ icons',lambda:new_listbox_body(3)))),
+                (u'Teste popup_menu',popup_menu_test),
                 (u'Exit', lambda: app.set_exit())]
 
     app.wait_app()
