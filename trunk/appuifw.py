@@ -117,11 +117,11 @@ class PopupMenu(QtGui.QDialog):
     def __cancel_but_clicked(self):
         self.selection = None
 
-    def show(self,menu_options,title):
+    def exec_(self,menu_options,title):
         self.setWindowTitle(title)
         self.__list.clear()
         self.__list.addItems(menu_options)
-        QtGui.QDialog.show(self)
+        return QtGui.QDialog.exec_(self)
         
     
 class PyS60App(QtGui.QWidget):
@@ -207,8 +207,8 @@ app = PyS60App()
 __pmenu = PopupMenu()
 
 def popup_menu(options,title):
-    __pmenu.show(options,title)
-    return __pmenu.selection
+    
+    return "value", __pmenu.exec_(options,title)
 
 if __name__ == "__main__":
 
