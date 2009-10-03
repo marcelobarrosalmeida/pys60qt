@@ -87,7 +87,6 @@ class Canvas(QtGui.QWidget):
 class PopupMenu(QtGui.QDialog):
     def __init__(self, parent=None,):
         QtGui.QDialog.__init__(self, parent)
-        self.selection = None
         self.__init_app_win()
         
     def __init_app_win(self):
@@ -111,18 +110,70 @@ class PopupMenu(QtGui.QDialog):
                      self.__cancel_but_clicked)   
 
     def __ok_but_clicked(self):
-        self.selection = self.__list.currentRow()
-        self.hide()
+        self.done(self.__list.currentRow())
 
     def __cancel_but_clicked(self):
-        self.selection = None
+        self.done(-1)
 
     def exec_(self,menu_options,title):
         self.setWindowTitle(title)
         self.__list.clear()
-        self.__list.addItems(menu_options)
-        return QtGui.QDialog.exec_(self)
+        if isinstance(menu_options[0],tuple):
+            items = [ "%s\n%s" % (a,b) for a,b in menu_options ]
+        else:
+            items = menu_options
+        self.__list.addItems(items)
+        ret = QtGui.QDialog.exec_(self)
+        if ret == -1:
+            return None
+        else:
+            return ret
         
+class SelectionList(QtGui.QDialog):
+    def __init__(self, parent=None,):
+        QtGui.QDialog.__init__(self, parent)
+        self.__init_app_win()
+        
+    def __init_app_win(self):
+        self.__ok_but = QtGui.QPushButton(u'Ok',self)
+        self.__cancel_but = QtGui.QPushButton(u'Cancel',self)
+        self.__list = QtGui.QListWidget(self)
+        self.__search = QtGui.QTextEdit(self)
+        self.__grid = QtGui.QGridLayout(self)
+        self.__grid.addWidget(self.__list,0,0,2,4)
+        self.__grid.addWidget(self.__ok_but,4,0)
+        self.__grid.addWidget(self.__cancel_but,4,1)        
+        self.setLayout(self.__grid)
+        self.setModal(True)
+        self.connect(self,
+                     QtCore.SIGNAL('itemDoubleClicked(QListWidgetItem*)'),
+                     self.__ok_but_clicked)
+        self.connect(self.__ok_but,
+                     QtCore.SIGNAL('clicked()'),
+                     self.__ok_but_clicked)
+        self.connect(self.__cancel_but,
+                     QtCore.SIGNAL('clicked()'),
+                     self.__cancel_but_clicked)   
+
+    def __ok_but_clicked(self):
+        self.done(self.__list.currentRow())
+
+    def __cancel_but_clicked(self):
+        self.done(-1)
+
+    def exec_(self,menu_options,title):
+        self.setWindowTitle(title)
+        self.__list.clear()
+        if isinstance(menu_options[0],tuple):
+            items = [ "%s\n%s" % (a,b) for a,b in menu_options ]
+        else:
+            items = menu_options
+        self.__list.addItems(items)
+        ret = QtGui.QDialog.exec_(self)
+        if ret == -1:
+            return None
+        else:
+            return ret
     
 class PyS60App(QtGui.QWidget):
     def __init__(self, parent=None, title=u'', size=(240,320)):
@@ -207,15 +258,21 @@ app = PyS60App()
 __pmenu = PopupMenu()
 
 def popup_menu(options,title):
-    
-    return "value", __pmenu.exec_(options,title)
+    if not options:
+        raise Exception(u"Option list can not be empty")
+    return __pmenu.exec_(options,title)
 
 if __name__ == "__main__":
 
-    def popup_menu_test(): 
-        op = [u'First option', u'Second option', u'Third option']
-        title = u'Your option:'
-        print popup_menu(op,title)
+    def popup_menu_test():
+        import random
+        m = random.randint(1,10)
+        if m % 2:
+            op = [ u"Option %d" % n for n in xrange(m) ]
+        else:
+            op = [ (u"Option %d" % n,u"Second line") for n in xrange(m) ]
+        title = u'Your option %d' % m
+        print "selected ->",popup_menu(op,title)
 
     def new_text_body():
         global app
@@ -251,13 +308,13 @@ if __name__ == "__main__":
                           (u"Item e",u"Second line",Icon(None,None,None))])
         app.body = lb
         
-    app.title = u"Bodies"
-    app.menu = [(u'Use Text', new_text_body),
-                (u'Listbox',((u'single',lambda:new_listbox_body(0)),
-                             (u'single w/ icons',lambda:new_listbox_body(1)),
-                             (u'double',lambda:new_listbox_body(2)),
-                             (u'double w/ icons',lambda:new_listbox_body(3)))),
-                (u'Teste popup_menu',popup_menu_test),
+    app.title = u"appuifw demo"
+    app.menu = [(u'Text body', new_text_body),
+                (u'Listbox body',((u'single',lambda:new_listbox_body(0)),
+                                  (u'single w/ icons',lambda:new_listbox_body(1)),
+                                  (u'double',lambda:new_listbox_body(2)),
+                                  (u'double w/ icons',lambda:new_listbox_body(3)))),
+                (u'popup_menu',popup_menu_test),
                 (u'Exit', lambda: app.set_exit())]
 
     app.wait_app()
