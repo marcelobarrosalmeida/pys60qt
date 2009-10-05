@@ -94,7 +94,7 @@ class PopupMenu(QtGui.QDialog):
         self.__cancel_but = QtGui.QPushButton(u'Cancel',self)        
         self.__list = QtGui.QListWidget(self)
         self.__grid = QtGui.QGridLayout(self)
-        self.__grid.addWidget(self.__list,0,0,2,4)
+        self.__grid.addWidget(self.__list,0,0,4,2)
         self.__grid.addWidget(self.__ok_but,4,0)
         self.__grid.addWidget(self.__cancel_but,4,1)        
         self.setLayout(self.__grid)
@@ -138,11 +138,12 @@ class SelectionList(QtGui.QDialog):
         self.__ok_but = QtGui.QPushButton(u'Ok',self)
         self.__cancel_but = QtGui.QPushButton(u'Cancel',self)
         self.__list = QtGui.QListWidget(self)
-        self.__search = QtGui.QTextEdit(self)
+        self.__search = QtGui.QLineEdit(self)
         self.__grid = QtGui.QGridLayout(self)
-        self.__grid.addWidget(self.__list,0,0,2,4)
-        self.__grid.addWidget(self.__ok_but,4,0)
-        self.__grid.addWidget(self.__cancel_but,4,1)        
+        self.__grid.addWidget(self.__list,0,0,4,2)
+        self.__grid.addWidget(self.__search,4,0,1,2)
+        self.__grid.addWidget(self.__ok_but,5,0)
+        self.__grid.addWidget(self.__cancel_but,5,1)        
         self.setLayout(self.__grid)
         self.setModal(True)
         self.connect(self,
@@ -255,12 +256,18 @@ class PyS60App(QtGui.QWidget):
         self.__menu_but.setMenu(menu)
 
 app = PyS60App()
-__pmenu = PopupMenu()
+__popup_menu = PopupMenu()
+__selection_list = SelectionList()
 
 def popup_menu(options,title):
     if not options:
         raise Exception(u"Option list can not be empty")
-    return __pmenu.exec_(options,title)
+    return __popup_menu.exec_(options,title)
+
+def selection_list(options,title):
+    if not options:
+        raise Exception(u"Option list can not be empty")
+    return __selection_list.exec_(options,title)
 
 if __name__ == "__main__":
 
@@ -273,6 +280,12 @@ if __name__ == "__main__":
             op = [ (u"Option %d" % n,u"Second line") for n in xrange(m) ]
         title = u'Your option %d' % m
         print "selected ->",popup_menu(op,title)
+    def selection_list_test():
+        import random
+        m = random.randint(1,10)
+        op = [ u"Option %d" % n for n in xrange(m) ]
+        title = u'Your option %d' % m
+        print "selected ->",selection_list(op,title)
 
     def new_text_body():
         global app
@@ -315,6 +328,7 @@ if __name__ == "__main__":
                                   (u'double',lambda:new_listbox_body(2)),
                                   (u'double w/ icons',lambda:new_listbox_body(3)))),
                 (u'popup_menu',popup_menu_test),
+                (u'selection_list',selection_list_test),
                 (u'Exit', lambda: app.set_exit())]
 
     app.wait_app()
