@@ -146,6 +146,7 @@ class SelectionList(QtGui.QDialog):
         self.__grid.addWidget(self.__cancel_but,5,1)
         self.__indexes = []
         self.__items = []
+        self.__search_field = False
         self.setLayout(self.__grid)
         self.setModal(True)
         self.connect(self,
@@ -180,13 +181,21 @@ class SelectionList(QtGui.QDialog):
         self.__list.clear()
         self.__list.addItems(items)
     
-    def exec_(self,items,search=False):
+    def exec_(self,items,search_field=False):
+        self.__search_field = search_field
         self.setWindowTitle(u"")
         self.__search.setText(u"")
         self.__list.clear()
         self.__list.addItems(items)
         self.__indexes = range(len(items))
         self.__items = items
+        if self.__search_field:
+              self.__search.show()
+              self.__grid.addWidget(self.__list,0,0,4,2)
+              self.__grid.addWidget(self.__search,4,0,1,2)
+        else:
+              self.__search.hide()
+              self.__grid.addWidget(self.__list,0,0,5,2)
         ret = QtGui.QDialog.exec_(self)
         if ret == -1:
             return None
@@ -281,27 +290,29 @@ def popup_menu(options,title):
         raise Exception(u"Option list can not be empty")
     return __popup_menu.exec_(options,title)
 
-def selection_list(options,search=False):
+def selection_list(options,search_field=False):
     if not options:
         raise Exception(u"Option list can not be empty")
-    return __selection_list.exec_(options,search)
+    return __selection_list.exec_(options,search_field)
 
 if __name__ == "__main__":
 
     def popup_menu_test():
         import random
-        m = random.randint(1,10)
+        m = random.randint(1,20)
         if m % 2:
             op = [ u"Option %d" % n for n in xrange(m) ]
         else:
             op = [ (u"Option %d" % n,u"Second line") for n in xrange(m) ]
         title = u'Your option %d' % m
         print "selected ->",popup_menu(op,title)
+        
     def selection_list_test():
         import random
-        m = random.randint(1,10)
+        m = random.randint(1,20)
         op = [ u"Option %d" % n for n in xrange(m) ]
-        print "selected ->",selection_list(op)
+        sf = m % 2 == 0
+        print "selected ->",selection_list(op,sf)
 
     def new_text_body():
         global app
