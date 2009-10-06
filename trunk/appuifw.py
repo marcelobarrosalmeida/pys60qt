@@ -143,7 +143,9 @@ class SelectionList(QtGui.QDialog):
         self.__grid.addWidget(self.__list,0,0,4,2)
         self.__grid.addWidget(self.__search,4,0,1,2)
         self.__grid.addWidget(self.__ok_but,5,0)
-        self.__grid.addWidget(self.__cancel_but,5,1)        
+        self.__grid.addWidget(self.__cancel_but,5,1)
+        self.__indexes = []
+        self.__items = []
         self.setLayout(self.__grid)
         self.setModal(True)
         self.connect(self,
@@ -155,26 +157,41 @@ class SelectionList(QtGui.QDialog):
         self.connect(self.__cancel_but,
                      QtCore.SIGNAL('clicked()'),
                      self.__cancel_but_clicked)   
-
+        self.connect(self.__search,
+                     QtCore.SIGNAL('textChanged(const QString&)'),
+                     self.__search_changed)
+        
     def __ok_but_clicked(self):
         self.done(self.__list.currentRow())
 
     def __cancel_but_clicked(self):
         self.done(-1)
 
-    def exec_(self,menu_options,title):
-        self.setWindowTitle(title)
+    def __search_changed(self):
+        items = []
+        indxs = []
+        search = self.__search.text()
+        for n in xrange(len(self.__items)):
+            item = self.__items[n]
+            if item.find(search) >= 0:
+                items.append(item)
+                indxs.append(n)
+        self.__indexes = indxs
         self.__list.clear()
-        if isinstance(menu_options[0],tuple):
-            items = [ "%s\n%s" % (a,b) for a,b in menu_options ]
-        else:
-            items = menu_options
         self.__list.addItems(items)
+    
+    def exec_(self,items,search=False):
+        self.setWindowTitle(u"")
+        self.__search.setText(u"")
+        self.__list.clear()
+        self.__list.addItems(items)
+        self.__indexes = range(len(items))
+        self.__items = items
         ret = QtGui.QDialog.exec_(self)
         if ret == -1:
             return None
         else:
-            return ret
+            return self.__indexes[ret]
     
 class PyS60App(QtGui.QWidget):
     def __init__(self, parent=None, title=u'', size=(240,320)):
@@ -264,10 +281,10 @@ def popup_menu(options,title):
         raise Exception(u"Option list can not be empty")
     return __popup_menu.exec_(options,title)
 
-def selection_list(options,title):
+def selection_list(options,search=False):
     if not options:
         raise Exception(u"Option list can not be empty")
-    return __selection_list.exec_(options,title)
+    return __selection_list.exec_(options,search)
 
 if __name__ == "__main__":
 
@@ -284,8 +301,7 @@ if __name__ == "__main__":
         import random
         m = random.randint(1,10)
         op = [ u"Option %d" % n for n in xrange(m) ]
-        title = u'Your option %d' % m
-        print "selected ->",selection_list(op,title)
+        print "selected ->",selection_list(op)
 
     def new_text_body():
         global app
