@@ -77,8 +77,42 @@ class Listbox(QtGui.QListWidget):
         return (self.x,self.y)
 
 class Text(QtGui.QTextEdit):
-    def __init__(self, parent=None, text=u''):
-        QtGui.QTextEdit.__init__(self, parent)
+    def __init__(self, text=u'', parent=None):
+        QtGui.QTextEdit.__init__(self, text, parent)
+
+    def add(self,text):
+        self.append(text)
+
+    def bind(self, event_code, callback):
+        pass
+
+    def clear(self):
+        QtGui.QTextEdit.clear(self)
+
+    def delete(self, pos=0, length=-1):
+        text = self.text()
+        if length == -1:
+            length = len(text) - pos
+        self.setText(text[:pos] + text[pos+length:])
+        # TODO: try to implement using cursors        
+    
+    def get_pos(self):
+        return self.textCursor().position()
+        
+    def len(self):
+        return len(self.text())
+
+    def get(self, pos=0, length=-1):
+        if length == -1:
+            length = len(text) - pos        
+        return self.text()[pos:pos+length]
+
+    def set(self,text):
+        self.setText(text)
+
+    def set_pos(self,cursos_pos):
+        self.setTextCursor(self.textCursor().setPosition(cursos_pos))
+
 
 class Canvas(QtGui.QWidget):
     def __init__(self, parent=None, text=u''):
