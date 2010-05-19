@@ -17,6 +17,14 @@
 import sys
 from PyQt4 import QtGui, QtCore
 
+def note(text,note_type=u'info',global_note=0):
+    note_types = {u'info':QtGui.QMessageBox.information,
+                  u'conf':QtGui.QMessageBox.warning,
+                  u'error':QtGui.QMessageBox.critical}
+    if note_type not in note_types.keys():
+        raise ValueError
+    note_types[note_type](None, note_type, text);
+     
 class Icon():
     def __init__(self,filename, bitmap, bitmap_mask):
         self.filename = filename
@@ -24,10 +32,7 @@ class Icon():
         self.bitmap_mask = bitmap_mask
         
 class Listbox(QtGui.QListWidget):
-    SINGLE = 1
-    SINGLE_WITH_ICONS = 2
-    DOUBLE = 3
-    DOUBLE_WITH_ICONS = 4
+    SINGLE, SINGLE_WITH_ICONS, DOUBLE, DOUBLE_WITH_ICONS = range(1,5)
     def __init__(self, items, callback=None, parent=None):
         self.callback = callback
         QtGui.QListWidget.__init__(self, parent)
@@ -355,6 +360,9 @@ if __name__ == "__main__":
         global app
         app.body = Text()
         app.title = u"Text body"
+
+    def note_test(t):
+        note(u"Note example",t)
         
     def new_listbox_body(tp):
         global app
@@ -392,6 +400,9 @@ if __name__ == "__main__":
                                   (u'double',lambda:new_listbox_body(2)),
                                   (u'double w/ icons',lambda:new_listbox_body(3)))),
                 (u'popup_menu',popup_menu_test),
+                (u'note',((u'info',lambda:note_test(u'info')),
+                          (u'error',lambda:note_test(u'error')),
+                          (u'conf',lambda:note_test(u'conf')))),
                 (u'selection_list',selection_list_test),
                 (u'Exit', lambda: app.set_exit())]
 
